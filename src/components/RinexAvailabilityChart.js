@@ -28,6 +28,21 @@ const RinexAvailabilityChart = (props) => {
     })
   }
 
+  const hourLines = [];
+  for (let i=1; i<24; i++) {
+    let strokeWidthScale = i % 3 ? 0.3 : 1;
+    strokeWidthScale =  i % 12 ? strokeWidthScale : 2;
+
+    hourLines.push(
+      <line key={i}
+        x1={BAR_WIDTH/24*i} y1={0}
+        x2={BAR_WIDTH/24*i} y2={BAR_HEIGHT}
+        stroke={"#000000"}
+        strokeWidth={ratio * STROKE_FIX * strokeWidthScale}
+      />
+    );
+  }
+
   return (
     <svg height={BAR_HEIGHT} width={BAR_WIDTH}>
       <rect
@@ -36,24 +51,7 @@ const RinexAvailabilityChart = (props) => {
         width={BAR_WIDTH}
         height={BAR_HEIGHT}
       />
-      <line
-        x1={props.max / 2 * ratio} y1={0}
-        x2={props.max / 2 * ratio} y2={BAR_HEIGHT}
-        stroke={"#000000"}
-        strokeWidth={ratio * STROKE_FIX}
-      />
-      <line
-        x1={props.max / 4 * ratio} y1={0}
-        x2={props.max / 4 * ratio} y2={BAR_HEIGHT}
-        stroke={"#000000"}
-        strokeWidth={ratio * STROKE_FIX}
-      />
-      <line
-        x1={props.max / 4 * ratio * 3} y1={0}
-        x2={props.max / 4 * ratio * 3} y2={BAR_HEIGHT}
-        stroke={"#000000"}
-        strokeWidth={ratio * STROKE_FIX}
-      />
+      {hourLines}
       {gapLines}
     </svg>
   )
