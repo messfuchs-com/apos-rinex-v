@@ -62,6 +62,8 @@ class RinexAvailability extends Component {
   }
 
   generateState(tempDate) {
+    // clear old data
+    this.setState({ providers: {}, date: null });
     const params = dateToObject(tempDate);
     const dateStr = formatDate(tempDate);
     let newStateObject = {
