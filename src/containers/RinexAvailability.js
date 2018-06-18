@@ -50,6 +50,16 @@ const styles = theme => (
     pos: {
       marginBottom: 12,
     },
+    expand: {
+      transform: 'rotate(0deg)',
+      transition: theme.transitions.create('transform', {
+        duration: theme.transitions.duration.shortest,
+      }),
+      marginLeft: 'auto',
+    },
+    expandOpen: {
+      transform: 'rotate(180deg)',
+    },
   });
 
 
@@ -75,9 +85,17 @@ class RinexAvailability extends Component {
     parseOldRinex(filePath).then( response => {
       console.log("lookes good");
       console.log(response);
+      const providers = {...response.providers};
+      
+      // Add attributes for nice rendering
+      Object.keys(providers).forEach(providerId => {
+        providers[providerId].isExpanded = false;
+        providers[providerId].gapList = [];
+      }; 
+
       this.setState({
         ...newStateObject,
-        providers: response.providers
+        providers: providers
       })
     }).catch( error => {
       console.log("error");
@@ -96,7 +114,7 @@ class RinexAvailability extends Component {
     const newState = this.generateState(event.target.value);
   }
 
-  createBarChart = (station, gaps) => {
+  createBarChart = (providerId, station, gaps) => {
     const gapList = [];
     for (let i = 0; i < gaps.length; i++) {
       const gBegin = parseInt(gaps[i].gBegin);
@@ -105,8 +123,15 @@ class RinexAvailability extends Component {
         gapList.push(j)
       }
     }
-    console.log(station);
-    console.log(gapList);
+    if (gapList.length > 0) {
+      console.log(station);
+      console.log(gapList);
+      const providers = {...this.state.providers};
+      const oldProvider = {...providers[providerId]};
+      oldProvider.gapList = oldProvider.gapList.concat(gapList);
+      providers[providerId] = oldProvider;
+      this.setState({ providers: providers });      
+    }
     return <Chart max={60 * 24} gaps={gapList} />
   }
 
@@ -141,14 +166,26 @@ class RinexAvailability extends Component {
           stationList.push(stationData);
         }
         let provider = (
-
           <Card className={classes.card} key={providerId}>
-
             <CardContent>
               <Typography variant="display1" gutterBottom>
                 {providerId}
+                <Chart max={60 * 24} gaps={this.providers[providerId].gapList} />
               </Typography>
             </CardContent>
+            <CardActions className={classes.actions} disableActionSpacing>
+              <IconButton
+                className={classnames(classes.expand, {
+                  [classes.expandOpen]: this.state.providers[providerId].isExpanded,
+                })}
+                onClick={this.handleExpandClick}
+                aria-expanded={this.state.providers[providerId].isExpanded}
+                aria-label="Show more"
+              >
+                <ExpandMoreIcon />
+              </IconButton>
+            </CardActions>
+            <Collapse in={this.state.providers[providerId].isExpanded} timeout="auto" unmountOnExit>
             <CardContent>
               <Paper className={classes.root}>
                 <Table className={classes.table}>
@@ -163,7 +200,7 @@ class RinexAvailability extends Component {
                   </TableHead>
                   <TableBody>
                     {stationList.map((n,idx) => {
-                      const barChart = this.createBarChart(n.sId, n.gaps);
+                      const barChart = this.createBarChart(providerId, n.sId, n.gaps);
                       return (
                         <TableRow key={"g"+n.sId+"-"+idx}>
                           <TableCell component="th" scope="row">
@@ -208,9 +245,7 @@ class RinexAvailability extends Component {
                 </Table>
               </Paper>
             </CardContent>
-            <CardActions>
-              <Button size="small">Learn More</Button>
-            </CardActions>
+            </Collapse>
           </Card>
         );
         providerList.push(provider);
