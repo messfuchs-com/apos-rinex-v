@@ -11,7 +11,7 @@ const styles = theme => ({
   textField: {
     marginLeft: theme.spacing.unit,
     marginRight: theme.spacing.unit,
-    width: 200,
+    width: 300,
   },
 });
  
@@ -34,9 +34,9 @@ function DatePicker(props) {
       <TextField
         id="date"
         onChange={props.changed}
-        label="AvailabilityDate"
+        label="Choosen Date"
         type="date"
-        defaultValue={strDate}
+        value={strDate}
         className={classes.textField}
         InputLabelProps={{
           shrink: true,

@@ -1,12 +1,15 @@
 import React, { Component } from 'react';
+import { BrowserRouter } from 'react-router-dom';
 import RinexAvailability from './containers/RinexAvailability';
 
 class App extends Component {
   render() {
     return (
-      <div className="App">
-        <RinexAvailability />
-      </div>
+      <BrowserRouter>
+        <div className="App">
+          <RinexAvailability />
+        </div>
+      </BrowserRouter>
     );
   }
 }
