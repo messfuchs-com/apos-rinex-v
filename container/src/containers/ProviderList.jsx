@@ -15,7 +15,8 @@ import parseOldRinex from '../share/parseOldRinex';
 import {dateToObject} from '../share/formatDate';
 import formatDate from '../share/formatDate';
 
-console.log(process.env);
+console.log(process.env)
+const rinexPath = process.env.REACT_APP_RINEX_PATH;
 
 const styles = theme => (
   {
@@ -51,18 +52,15 @@ const styles = theme => (
     }
   });
 
-const colWidth = {
-    width: '10%',
-};
-
-// const rinexPath = process.env.PUBLIC_URL + '/assets/rinex/';
-const rinexPath = process.env.PUBLIC_URL + process.env.REACT_APP_RINEX_PATH;
-
 
 class ProviderList extends Component {
-  state = {
-    providers: {},
-  }
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      providers: {},
+    }
+  }  
 
   componentDidMount() {
     this.generateState(this.props.date);
@@ -89,11 +87,11 @@ class ProviderList extends Component {
     });
   }
 
-  createBarChart = (station, gaps) => {
+  createBarChart(station, gaps) {
     const gapList = [];
     for (let i = 0; i < gaps.length; i++) {
-      const gBegin = parseInt(gaps[i].gBegin);
-      const gEnd = parseInt(gaps[i].gEnd);
+      const gBegin = parseInt(gaps[i].gBegin, 10);
+      const gEnd = parseInt(gaps[i].gEnd, 10);
       for (let j = gBegin; j <= (gEnd); j++) {
         gapList.push(j)
       }
@@ -119,9 +117,7 @@ class ProviderList extends Component {
         Object.keys(providers).forEach(providerId => {
           const stationList = [];
           const detailList = [];
-          const tableData = [];
           for (let i = 0; i < providers[providerId].stations.length; i++) {
-            const idx = 'stn' + i;
             let station = providers[providerId].stations[i];
             let stationData = {
               sId: station.sId,
