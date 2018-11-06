@@ -5,6 +5,7 @@ import { withStyles } from '@material-ui/core/styles';
 import { Route, Switch, withRouter } from 'react-router-dom';
 
 import Button from '@material-ui/core/Button';
+// import Popper from '@material-ui/core/Popper';
 
 import DatePicker from '../hoc/pickers/DatePicker';
 
@@ -25,10 +26,10 @@ const styles = theme => (
     },
     card: {
       minWidth: 275,
-      margin: 10
+      margin: 10,
     },
     innerCard: {
-      margin: 5
+      margin: 5,
     },
     bullet: {
       display: 'inline-block',
@@ -44,93 +45,95 @@ const styles = theme => (
     },
     button: {
       margin: theme.spacing.unit,
-    }
+    },
   });
 
 
 class RinexAvailability extends Component {
-
   constructor(props) {
     super(props);
     this.state = { date: null };
-  }
-
-  generateState(tempDate) {
-    const dateStr = formatDate(tempDate);
-    let newStateObject = {
-      date: dateStr
-    };
-    this.setState(newStateObject);
-    this.onUpdateUrlHandler('/' + formatDate(dateStr));
-
-  }
-
-  componentWillMount() {
-    let newDate = new Date();
-    newDate = newDate.setDate(newDate.getDate()-1);
-    const location = this.props.location.pathname.replace("/", "").split("?")[0];
-    if (!(location === "")) {
-      newDate = location;
-    } 
-    this.generateState(newDate);
   }
 
   onChangeDateHandler = (event) => {
     this.generateState(event.target.value);
   }
 
-  onAddDayHandler = (event) => {
+  onAddDayHandler = () => {
     this.changeDate(1);
   }
 
-  onSubDayHandler = (event) => {
+  onSubDayHandler = () => {
     this.changeDate(-1);
   }
 
   onUpdateUrlHandler = (newPath) => {
-    this.props.history.push({pathname: newPath});
+    this.props.history.push({ pathname: newPath });
+  }
+
+  UNSAFE_componentWillMount() {
+    let newDate = new Date();
+    newDate = newDate.setDate(newDate.getDate() - 1);
+    let { location } = this.props;
+    location = location.pathname.replace('/', '').split('?')[0];
+    if (!(location === '')) {
+      newDate = location;
+    }
+    this.generateState(newDate);
+  }
+
+  generateState(tempDate) {
+    const dateStr = formatDate(tempDate);
+    const newStateObject = {
+      date: dateStr,
+    };
+    this.setState(newStateObject);
+    this.onUpdateUrlHandler(`/${formatDate(dateStr)}`);
   }
 
   changeDate(days) {
-    const oldDate = new Date(this.state.date);
-    let newDate = new Date(oldDate.valueOf());
+    const { date } = this.state;
+    const oldDate = new Date(date);
+    const newDate = new Date(oldDate.valueOf());
     newDate.setDate(newDate.getDate() + days);
     this.generateState(newDate);
   }
 
   render() {
-
     const Child = ({ match }) => (
-      <ProviderList date={ match.params.date } />    
-    )
-    const { classes } = this.props;    
+      <ProviderList date={match.params.date} />
+    );
+    const { classes } = this.props;
+    const { date } = this.state;
 
     return (
       <div>
-        <Card className={classes.card} key={"chooseDate"}>
+        <Card className={classes.card} key="chooseDate">
           <CardContent>
             <Grid container spacing={16}>
               <Grid item xs={2}>
-                <Button 
-                  variant="outlined" 
-                  onClick={(event) => this.onSubDayHandler(event)}
-                  className={classes.button}>
-                      -1d
+                <Button
+                  variant="outlined"
+                  onClick={event => this.onSubDayHandler(event)}
+                  className={classes.button}
+                >
+                  -1d
                 </Button>
               </Grid>
               <Grid item xs={4}>
-                <DatePicker 
-                  date={this.state.date} 
-                  changed={(event) => this.onChangeDateHandler(event)}
+                <DatePicker
+                  date={date}
+                  changed={event => this.onChangeDateHandler(event)}
                 />
               </Grid>
 
               <Grid item xs={2}>
-                <Button 
-                  variant="outlined" 
-                  onClick={(event) => this.onAddDayHandler(event)}
-                  className={classes.button}>
-                    +1d
+                <Button
+                  variant="outlined"
+                  onClick={event => this.onAddDayHandler(event)}
+                  className={classes.button}
+                >
+                  +1d
                 </Button>
               </Grid>
 
@@ -139,7 +142,7 @@ class RinexAvailability extends Component {
         </Card>
         <Switch>
           {/* <Route path={this.props.match.url + '/:date'} exact component={ProviderList} /> */}
-          <Route path="/:date" component={ Child } />
+          <Route path="/:date" component={Child} />
         </Switch>
       </div>
     );
@@ -147,7 +150,8 @@ class RinexAvailability extends Component {
 }
 
 RinexAvailability.propTypes = {
-  classes: PropTypes.object.isRequired,
+  classes: PropTypes.isRequired,
+  location: PropTypes.string.isRequired,
 };
 
 export default withRouter(withStyles(styles)(RinexAvailability));

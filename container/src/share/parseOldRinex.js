@@ -35,50 +35,49 @@ export default function parseOldRinex(oldRinexHtml) {
           }
 
           if (tableColumns.length <= 4 && tableColumns.length >= 3) {
-            if (tableColumns.length > 3 && tableColumns[0].children[0].innerHTML === 'Station') continue;
-            if (tableColumns.length === 4) {
-              stationName = tableColumns[0].children[0].innerHTML.replace(/\ /g, '').replace(/\n/g, '');
-            }
+            if (!(tableColumns.length > 3 && tableColumns[0].children[0].innerHTML === 'Station')) {
+              if (tableColumns.length === 4) {
+                stationName = tableColumns[0].children[0].innerHTML.replace(/ /g, '').replace(/\n/g, '');
+              }
 
-            if (!(stationName in allGaps)) {
-              allGaps[stationName] = {};
-            }
+              if (!(stationName in allGaps)) {
+                allGaps[stationName] = {};
+              }
 
-            if (!('detail' in allGaps[stationName])) {
-              allGaps[stationName].detail = [];
-            }
+              if (!('detail' in allGaps[stationName])) {
+                allGaps[stationName].detail = [];
+              }
 
-            let duranceHour;
-            let duranceSec;
-            let timeWindow;
+              let duranceHour;
+              let duranceSec;
+              let timeWindow;
 
-            switch (tableColumns.length) {
-              case 4:
-                timeWindow = tableColumns[1].innerHTML;
-                duranceSec = parseInt(tableColumns[2].innerHTML, 0);
-                duranceHour = tableColumns[3].innerHTML;
-                break;
-              case 3:
-                timeWindow = tableColumns[0].innerHTML;
-                duranceSec = parseInt(tableColumns[1].innerHTML, 0);
-                duranceHour = tableColumns[2].innerHTML;
-                break;
-              default:
-                console.log('You should not be here!');
-            }
-            timeWindow = timeWindow.replace(/ /g, '').replace(/\n/g, '').replace('-', ' ').split(' ');
-            const duranceFrom = timeWindow[0];
-            const duranceUntil = timeWindow[1];
+              switch (tableColumns.length) {
+                case 4:
+                  timeWindow = tableColumns[1].innerHTML;
+                  duranceSec = parseInt(tableColumns[2].innerHTML, 0);
+                  duranceHour = tableColumns[3].innerHTML;
+                  break;
+                case 3:
+                  timeWindow = tableColumns[0].innerHTML;
+                  duranceSec = parseInt(tableColumns[1].innerHTML, 0);
+                  duranceHour = tableColumns[2].innerHTML;
+                  break;
+                default:
+                  break;
+              }
+              timeWindow = timeWindow.replace(/ /g, '').replace(/\n/g, '').replace('-', ' ').split(' ');
+              const duranceFrom = timeWindow[0];
+              const duranceUntil = timeWindow[1];
 
-            allGaps[stationName].detail.push(
-              {
+              allGaps[stationName].detail.push({
                 sId: stationName,
                 duranceFrom,
                 duranceUntil,
                 duranceSec,
                 duranceHour,
-              },
-            );
+              });
+            }
           }
 
           if (tableColumns.length < 6) continue;
@@ -136,24 +135,24 @@ export default function parseOldRinex(oldRinexHtml) {
         }
 
         Object.keys(allGaps).forEach((gap) => {
-          provider = allGaps[gap].provider;
-          if (!(provider in rinexData.providers)) {
-            rinexData.providers[provider] = {
+          const providerName = allGaps[gap].provider;
+          if (!(providerName in rinexData.providers)) {
+            rinexData.providers[providerName] = {
               stations: [],
             };
           }
-          rinexData.providers[provider].stations.push(allGaps[gap]);
+          rinexData.providers[providerName].stations.push(allGaps[gap]);
           gapList.push(allGaps[gap]);
         });
 
-        console.log(rinexData);
+        // console.log(rinexData);
 
         if (rinexData.providers.length === 0) {
           reject(Error('No Data parsed'));
         }
         resolve(rinexData);
       } else {
-        console.log('Wrong Status Code');
+        // console.log('Wrong Status Code');
         reject(Error(req.statusText));
       }
     };
