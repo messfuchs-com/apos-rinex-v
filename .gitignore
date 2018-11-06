@@ -22,3 +22,5 @@ yarn-error.log*
 2018/
 container/node_modules/
 container/build/
+container/build-*.zip
+container/package-lock.json
